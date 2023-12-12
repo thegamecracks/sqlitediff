@@ -41,7 +41,7 @@ class NewObject(Change):
     sql: str
 
     def to_sql(self) -> str:
-        return self.sql
+        return self.sql + ";"
 
 
 @dataclass
