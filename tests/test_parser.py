@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import lark
 import pytest
 
@@ -56,4 +58,10 @@ def test_table_option(table_parser: lark.Lark) -> None:
 
 def test_table_options(table_parser: lark.Lark) -> None:
     tree = table_parser.parse("CREATE TABLE foo (x TEXT PRIMARY KEY) STRICT, WITHOUT ROWID")
+    print(tree.pretty())
+
+
+def test_image_tags(table_parser: lark.Lark) -> None:
+    path = Path(__file__).parent / "image_tags.sql"
+    tree = table_parser.parse(path.read_text())
     print(tree.pretty())
