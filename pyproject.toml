@@ -11,6 +11,14 @@ authors = [{ name = "thegamecracks" }]
 license = { text = "MIT" }
 classifiers = []
 dynamic = ["version"]
+dependencies = [
+    "lark>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "sqlitediff.__version__"}
