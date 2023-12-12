@@ -86,27 +86,22 @@ def _object_diff(
     new: Dict[str, T],
     old: Dict[str, T],
 ) -> SchemaDiff:
-    _new: List[Change] = []
-    for name in new.keys() - old.keys():
-        _new.append(NewObject(str(new[name])))
+    diff = SchemaDiff(new=[], modified=[], deleted=[])
 
-    _modified: List[Change] = []
+    for name in new.keys() - old.keys():
+        diff.new.append(NewObject(str(new[name])))
+
     for name in new.keys() & old.keys():
         if new[name] != old[name]:
             # FIXME: name must be escaped
             change = ModifiedObject(type=type, name=name, sql=str(new[name]))
-            _modified.append(change)
+            diff.modified.append(change)
 
-    _deleted: List[Change] = []
     for name in old.keys() - new.keys():
         # FIXME: name must be escaped
-        _deleted.append(DeletedObject(type=type, name=name))
+        diff.deleted.append(DeletedObject(type=type, name=name))
 
-    return SchemaDiff(
-        new=_new,
-        modified=_modified,
-        deleted=_deleted,
-    )
+    return diff
 
 
 def schema_diff(new: Schema, old: Schema) -> SchemaDiff:
