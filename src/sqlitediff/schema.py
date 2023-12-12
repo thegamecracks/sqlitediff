@@ -43,9 +43,14 @@ class Schema:
         return schema_diff(self, other)
 
 
-def load_tables(sql: str) -> List[Table]:
+def load_tables(sql: str, *, only_one: bool = False) -> List[Table]:
     tree = create_table_parser().parse(sql)
-    return TableTransformer().transform(tree).children
+    tables = cast(List[Table], TableTransformer().transform(tree).children)
+
+    if only_one and len(tables) != 1:
+        raise ValueError(f"Expected exactly 1 table definition, found {len(tables)}")
+
+    return tables
 
 
 def load_schema(conn: sqlite3.Connection) -> Schema:
@@ -54,7 +59,7 @@ def load_schema(conn: sqlite3.Connection) -> Schema:
     views = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'view'").fetchall()
     triggers = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'trigger'").fetchall()
     return Schema(
-        tables={name: load_tables(sql)[0] for name, sql in tables},
+        tables={name: load_tables(sql, only_one=True)[0] for name, sql in tables},
         indices={name: Index(sql) for name, sql in indices},
         views={name: View(sql) for name, sql in views},
         triggers={name: Trigger(sql) for name, sql in triggers},
