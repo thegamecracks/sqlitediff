@@ -1,5 +1,8 @@
+import sqlite3
 from dataclasses import dataclass, field
-from typing import Dict, NewType, Optional, Set
+from typing import Dict, List, NewType, Optional, Set
+
+from .parser import TableTransformer, create_table_parser
 
 ColumnOption = NewType("ColumnOption", str)
 TableConstraint = NewType("TableConstraint", str)
@@ -32,3 +35,21 @@ class Schema:
     indices: Dict[str, Index]
     views: Dict[str, View]
     triggers: Dict[str, Trigger]
+
+
+def load_tables(sql: str) -> List[Table]:
+    tree = create_table_parser().parse(sql)
+    return TableTransformer().transform(tree).children
+
+
+def load_schema(conn: sqlite3.Connection) -> Schema:
+    tables = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'table'").fetchall()
+    indices = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'index'").fetchall()
+    views = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'view'").fetchall()
+    triggers = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'trigger'").fetchall()
+    return Schema(
+        tables={name: load_tables(sql)[0] for name, sql in tables},
+        indices={name: Index(sql) for name, sql in indices},
+        views={name: View(sql) for name, sql in views},
+        triggers={name: Trigger(sql) for name, sql in triggers},
+    )
