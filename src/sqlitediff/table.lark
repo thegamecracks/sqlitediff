@@ -12,8 +12,8 @@ table_constraints: ("," table_constraint)+
 table_options: table_option ("," table_option)*
 
 name: CNAME
-    | /"[^"]+"/
-    | /'[^']+'/
+    | /"[^"]*"/
+    | /'[^']*'/
 
 column: name type? column_constraint*
 type: name
