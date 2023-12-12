@@ -15,7 +15,7 @@ name: CNAME
     | /"[^"]+"/
     | /'[^']+'/
 
-column: name type? column_constraint?
+column: name type? column_constraint*
 type: name
 
 column_constraint: CONSTRAINT name
