@@ -4,7 +4,7 @@
 
 start: statement+
 
-statement: create_table (";" statement)*
+statement: create_table (";" statement)* ";"?
 
 create_table: "CREATE"i "TABLE"i name "(" columns table_constraints? ")" table_options?
 columns: column ("," column)*
