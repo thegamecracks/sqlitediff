@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import itertools
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, TypeVar
 
@@ -124,10 +123,23 @@ class SchemaDiff:
         self.deleted.extend(diff.deleted)
 
     def to_sql(self) -> str:
-        statements: List[str] = []
-        for change in itertools.chain(self.modified, self.deleted, self.new):
-            statements.append(change.to_sql())
-        return "\n".join(statements)
+        grouped_changes = {
+            "modified": self.modified,
+            "deleted": self.deleted,
+            "new": self.new
+        }
+
+        grouped_statements: List[str] = []
+        for group, changes in grouped_changes.items():
+            if len(changes) == 0:
+                continue
+
+            statements = [f"-- {group.title()} Objects --"]
+            for change in changes:
+                statements.append(change.to_sql())
+            grouped_statements.append("\n\n".join(statements))
+
+        return "\n\n".join(grouped_statements)
 
 
 def _column_diff(
