@@ -29,6 +29,6 @@ Trigger = NewType("Trigger", str)
 @dataclass
 class Schema:
     tables: Dict[str, Table]
-    indices: Set[Index]
-    views: Set[View]
-    triggers: Set[Trigger]
+    indices: Dict[str, Index]
+    views: Dict[str, View]
+    triggers: Dict[str, Trigger]
