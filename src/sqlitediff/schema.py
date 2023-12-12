@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sqlite3
 from dataclasses import dataclass, field
-from typing import Dict, List, NewType, Optional, Set
+from typing import Dict, List, NewType, Optional, Set, cast
 
 from .diff import SchemaDiff, schema_diff
 from .parser import TableTransformer, create_table_parser
@@ -18,6 +18,13 @@ class Column:
     type: Optional[str]
     constraints: Set[ColumnOption] = field(hash=False)
 
+    def to_sql(self) -> str:
+        parts = [self.name]
+        if self.type is not None:
+            parts.append(self.type)
+        parts.extend(self.constraints)
+        return " ".join(parts)
+
 
 @dataclass
 class Table:
@@ -25,6 +32,7 @@ class Table:
     columns: Dict[str, Column]
     constraints: Set[TableConstraint]
     options: Set[TableOption]
+    sql: Optional[str] = field(default=None)
 
 
 Index = NewType("Index", str)
@@ -49,6 +57,9 @@ def load_tables(sql: str, *, only_one: bool = False) -> List[Table]:
 
     if only_one and len(tables) != 1:
         raise ValueError(f"Expected exactly 1 table definition, found {len(tables)}")
+
+    for table in tables:
+        table.sql = sql
 
     return tables
 
