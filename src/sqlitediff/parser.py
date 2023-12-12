@@ -33,7 +33,7 @@ class TableTransformer(lark.Transformer):
         return Column(name=children[0], type=children[1], constraints=set(children[2:]))
 
     def columns(self, children):
-        return set(children)
+        return {column.name: column for column in children}
 
     def table_constraint(self, children):
         return " ".join(children)
