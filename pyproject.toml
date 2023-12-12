@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sqlitediff"
+description = "A command-line program for generating SQLite diffs."
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "thegamecracks" }]
+license = { text = "MIT" }
+classifiers = []
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "sqlitediff.__version__"}
+
+[project.urls]
+"Homepage" = "https://github.com/thegamecracks/sqlitediff"
+"Issue Tracker" = "https://github.com/thegamecracks/sqlitediff/issues"
