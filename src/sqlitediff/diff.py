@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, Tuple, TypeVar
+from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, TypeVar
 
 if TYPE_CHECKING:
     from .schema import Column, Schema, Table
