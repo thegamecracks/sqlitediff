@@ -34,7 +34,7 @@ column_constraint: CONSTRAINT name
                   | CHECK unknown_token+
                   | FOREIGN KEY unknown_token+
 table_option: unknown_token+
-?!unknown_token: name | "(" unknown_token+ ")"
+?!unknown_token: name | "(" ( unknown_token | "," )+ ")"
 
 ALWAYS: "ALWAYS"i
 AS: "AS"i
