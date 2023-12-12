@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import sqlite3
 from dataclasses import dataclass, field
 from typing import Dict, List, NewType, Optional, Set
 
+from .diff import SchemaDiff, schema_diff
 from .parser import TableTransformer, create_table_parser
 
 ColumnOption = NewType("ColumnOption", str)
@@ -35,6 +38,9 @@ class Schema:
     indices: Dict[str, Index]
     views: Dict[str, View]
     triggers: Dict[str, Trigger]
+
+    def difference(self, other: Schema) -> SchemaDiff:
+        return schema_diff(self, other)
 
 
 def load_tables(sql: str) -> List[Table]:
