@@ -21,13 +21,13 @@ DROP TABLE sqlitediff_temp;
 
 -- Previous index schema for ix_user_name:
 -- CREATE INDEX ix_user_name ON user (name);
-DROP INDEX ix_user_name;
+DROP INDEX IF EXISTS ix_user_name;
 CREATE INDEX ix_user_name ON user (name, id);
 
 -- Previous view schema for user_group_kawaii:
 -- CREATE VIEW user_group_kawaii (id) AS
 --     SELECT user_id FROM user_group WHERE group_id = 1;
-DROP VIEW user_group_kawaii;
+DROP VIEW IF EXISTS user_group_kawaii;
 CREATE VIEW user_group_kawaii (id) AS
     SELECT user_id FROM user_group WHERE group_id = 2;
 
@@ -37,7 +37,7 @@ CREATE VIEW user_group_kawaii (id) AS
 --     BEGIN
 --         INSERT INTO user_group (user_id, group_id) VALUES (new.id, 1);
 --     END;
-DROP TRIGGER add_user_to_kawaii_group;
+DROP TRIGGER IF EXISTS add_user_to_kawaii_group;
 CREATE TRIGGER add_user_to_kawaii_group
     INSERT ON user
     BEGIN

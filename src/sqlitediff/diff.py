@@ -109,7 +109,7 @@ class ModifiedObject(Change):
         return (
             f"-- Previous {self.type} schema for {self.name}:\n"
             f"{sql_comment(self.old + ';')}\n"
-            f"DROP {self.type.upper()} {self.name};\n"
+            f"DROP {self.type.upper()} IF EXISTS {self.name};\n"
             f"{self.new};"
         )
 
@@ -120,7 +120,7 @@ class DeletedObject(Change):
     name: str
 
     def to_sql(self) -> str:
-        return f"DROP {self.type.upper()} {self.name};"
+        return f"DROP {self.type.upper()} IF EXISTS {self.name};"
 
 
 @dataclass
