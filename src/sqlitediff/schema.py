@@ -32,7 +32,7 @@ class Table:
     columns: Dict[str, Column]
     constraints: Set[TableConstraint]
     options: Set[TableOption]
-    sql: Optional[str] = field(default=None)
+    sql: Optional[str] = field(default=None, repr=False)
 
 
 Index = NewType("Index", str)

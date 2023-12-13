@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, TypeVar
 
 if TYPE_CHECKING:
@@ -86,7 +86,7 @@ ObjectType = Literal["index", "view", "trigger"]
 
 @dataclass
 class NewObject(Change):
-    sql: str
+    sql: str = field(repr=False)
 
     def to_sql(self) -> str:
         return self.sql + ";"
@@ -96,7 +96,7 @@ class NewObject(Change):
 class ModifiedObject(Change):
     type: ObjectType
     name: str
-    sql: str
+    sql: str = field(repr=False)
 
     def to_sql(self) -> str:
         return f"DROP {self.type.upper()} {self.name};\n{self.sql};"
