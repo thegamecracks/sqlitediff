@@ -105,8 +105,9 @@ def sql_diff_checklist(diff: SchemaDiff) -> str:
     if column_will_be_dropped(diff):
         checklist.append(
             "Any DROP COLUMN statements are not referenced by another\n"
-            "check, foreign key, index, trigger, view, or it has a\n"
-            "PRIMARY KEY or UNIQUE constraint.\n"
+            "view, check, foreign key, trigger, or index, including\n"
+            "PRIMARY KEY and UNIQUE constraints. If this is the case,\n"
+            "those references must be dropped before the column.\n"
             "https://sqlite.org/lang_altertable.html#alter_table_drop_column"
         )
 
