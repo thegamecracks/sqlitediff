@@ -33,10 +33,10 @@ class TableTransformer(lark.Transformer):
         if len(children) < 2:
             children.append(None)
 
-        return Column(name=children[0], type=children[1], constraints=set(children[2:]))
+        return Column(raw_name=children[0], type=children[1], constraints=set(children[2:]))
 
     def columns(self, children):
-        return {column.name: column for column in children}
+        return {column.raw_name: column for column in children}
 
     def table_constraint(self, children):
         return " ".join(children)
@@ -59,7 +59,8 @@ class TableTransformer(lark.Transformer):
             children.append(set())
 
         return Table(
-            name=children[0],
+            name="missing true name",  # this will be filled in by load_schema()
+            raw_name=children[0],
             columns=children[1],
             constraints=children[2],
             options=children[3],

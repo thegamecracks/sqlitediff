@@ -22,7 +22,7 @@ class NewTable(Change):
 
     def to_sql(self) -> str:
         if self.table.sql is None:
-            raise ValueError(f"No source SQL available for {self.table.name} table")
+            raise ValueError(f"No source SQL available for {self.table.raw_name} table")
         return self.table.sql
 
 
@@ -34,23 +34,23 @@ class ModifiedTable(Change):
 
     def to_sql(self) -> str:
         if self.old.sql is None:
-            raise ValueError(f"No source SQL available for {self.old.name} table")
+            raise ValueError(f"No source SQL available for {self.old.raw_name} table")
         if self.new.sql is None:
-            raise ValueError(f"No source SQL available for {self.new.name} table")
+            raise ValueError(f"No source SQL available for {self.new.raw_name} table")
 
-        columns = ", ".join(c.name for c in self.old.columns.values())
+        columns = ", ".join(c.raw_name for c in self.old.columns.values())
         sql = [
-            f"-- Previous table schema for {self.old.name}:",
+            f"-- Previous table schema for {self.old.raw_name}:",
             f"{sql_comment(self.old.sql + ';')}",
-            f"ALTER TABLE {self.old.name} RENAME TO sqlitediff_temp;",
+            f"ALTER TABLE {self.old.raw_name} RENAME TO sqlitediff_temp;",
             f"{self.new.sql};",
-            f"INSERT INTO {self.new.name} ({columns}) SELECT * FROM sqlitediff_temp;",
+            f"INSERT INTO {self.new.raw_name} ({columns}) SELECT * FROM sqlitediff_temp;",
             f"DROP TABLE sqlitediff_temp;",
         ]
 
         if len(self.associations) > 0:
             sql.append("")
-            sql.append(f"-- Restoring associations for {self.new.name}:")
+            sql.append(f"-- Restoring associations for {self.new.raw_name}:")
             sql.extend(a.sql + ";" for a in self.associations)
 
         return "\n".join(sql)
@@ -61,7 +61,7 @@ class DeletedTable(Change):
     table: Table
 
     def to_sql(self) -> str:
-        return f"DELETE TABLE {self.table.name};"
+        return f"DELETE TABLE {self.table.raw_name};"
 
 
 @dataclass
@@ -70,7 +70,7 @@ class NewColumn(Change):
     column: Column
 
     def to_sql(self) -> str:
-        return f"ALTER TABLE {self.table.name} ADD COLUMN {self.column.to_sql()};"
+        return f"ALTER TABLE {self.table.raw_name} ADD COLUMN {self.column.to_sql()};"
 
 
 @dataclass
@@ -81,7 +81,7 @@ class ModifiedColumn(Change):
 
     def to_sql(self) -> str:
         raise TypeError(
-            f"Column {self.new.name} for table {self.table.name} cannot be modified "
+            f"Column {self.new.raw_name} for table {self.table.raw_name} cannot be modified "
             f"in-place as SQLite does not support it."
         )
 
@@ -92,7 +92,7 @@ class DeletedColumn(Change):
     column: Column
 
     def to_sql(self) -> str:
-        return f"ALTER TABLE {self.table.name} DROP COLUMN {self.column.name};"
+        return f"ALTER TABLE {self.table.raw_name} DROP COLUMN {self.column.raw_name};"
 
 
 ObjectType = Literal["index", "view", "trigger"]
@@ -272,7 +272,7 @@ def _add_table_associations(diff: SchemaDiff, objects: Sequence[Association]) ->
     for c in modified:
         arr: List[Association] = []
         for o in objects:
-            if o.tbl_name != c.new.name:
+            if o.tbl_name != c.new.raw_name:
                 continue
             if _is_association_modified(o, diff):
                 continue
