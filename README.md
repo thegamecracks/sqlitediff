@@ -60,6 +60,19 @@ COMMIT;
 PRAGMA foreign_keys = off; -- As initially configured by database
 ```
 
+## Usage
+
+Assuming you have Python 3.8+ and Git, you can install this library with:
+
+```sh
+pip install git+https://github.com/thegamecracks/sqlitediff
+```
+
+After installation, the command-line interface can be used with `sqlitediff`
+or `python -m sqlitediff`. It can compare SQLite database files directly
+or take .sql scripts which are executed in-memory before comparison.
+See [`sqlitediff --help`](/src/sqlitediff/__main__.py) for more information.
+
 ## License
 
 This project is written under the [MIT] license.
