@@ -36,10 +36,10 @@ class Table:
     sql: Optional[str] = field(default=None, repr=False)
 
 
-@dataclass(repr=False)
+@dataclass
 class Object:
     name: str
-    sql: str
+    sql: str = field(repr=False)
     tbl_name: str
 
     def __str__(self) -> str:
