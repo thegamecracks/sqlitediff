@@ -1,6 +1,6 @@
 # sqlitediff
 
-[![](https://img.shields.io/github/actions/workflow/status/thegamecracks/sqlitediff/pyright-lint.yml?style=flat-square&label=lint)](https://microsoft.github.io/pyright/#/)
+[![](https://img.shields.io/github/actions/workflow/status/thegamecracks/sqlitediff/pyright-lint.yml?style=flat-square&label=pyright)](https://microsoft.github.io/pyright/#/)
 [![](https://img.shields.io/github/actions/workflow/status/thegamecracks/sqlitediff/python-test.yml?style=flat-square&logo=pytest&label=tests)](https://docs.pytest.org/en/stable/)
 
 A command-line program for generating SQLite schema diffs.
