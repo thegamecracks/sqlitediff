@@ -16,7 +16,7 @@ import contextlib
 import sqlite3
 import textwrap
 from pathlib import Path
-from typing import List, Union
+from typing import Iterable, Iterator, List, Type, TypeVar, Union
 
 import sqlitediff
 from .diff import (
@@ -31,6 +31,36 @@ from .diff import (
 from .escapes import sql_comment
 from .schema import Column, load_schema
 
+T = TypeVar("T")
+
+
+def filter_type(cls: Type[T], it: Iterable[object]) -> Iterator[T]:
+    for obj in it:
+        if isinstance(obj, cls):
+            yield obj
+
+
+def contains_type(cls: Type[object], it: Iterable[object]) -> bool:
+    for _ in filter_type(cls, it):
+        return True
+    return False
+
+
+def has_new_and_deleted_tables(diff: SchemaDiff) -> bool:
+    if not contains_type(NewTable, diff.new):
+        return False
+    if not contains_type(DeletedTable, diff.deleted):
+        return False
+    return True
+
+
+def has_new_and_deleted_columns(diff: SchemaDiff) -> bool:
+    if not contains_type(NewColumn, diff.new):
+        return False
+    if not contains_type(DeletedColumn, diff.deleted):
+        return False
+    return True
+
 
 def valid_column_default(column: Column) -> bool:
     nullable = True
@@ -42,12 +72,21 @@ def valid_column_default(column: Column) -> bool:
     return nullable or not null_default
 
 
+def all_column_changes_have_valid_defaults(diff: SchemaDiff) -> bool:
+    for c in filter_type(NewColumn, diff.new):
+        if not valid_column_default(c.column):
+            return False
+    for c in filter_type(ModifiedColumn, diff.modified):
+        if not valid_column_default(c.new):
+            return False
+    return False
+
+
 def sql_diff_checklist(diff: SchemaDiff) -> str:
+    # Checklist should be written to suit the phrase, "Please make sure that..."
     checklist: List[str] = []
 
-    if any(isinstance(c, (NewTable, NewColumn)) for c in diff.new) and any(
-        isinstance(c, (DeletedTable, DeletedColumn)) for c in diff.deleted
-    ):
+    if has_new_and_deleted_tables(diff) or has_new_and_deleted_columns(diff):
         checklist.append(
             "Any new tables or columns were not intended to be renames\n"
             "of existing tables/columns. If this appears to be the case,\n"
@@ -55,13 +94,7 @@ def sql_diff_checklist(diff: SchemaDiff) -> str:
             "statement to prevent data loss."
         )
 
-    if any(
-        isinstance(c, NewColumn) and not valid_column_default(c.column)
-        for c in diff.new
-    ) or any(
-        isinstance(c, ModifiedColumn) and not valid_column_default(c.new)
-        for c in diff.modified
-    ):
+    if not all_column_changes_have_valid_defaults(diff):
         checklist.append(
             "All ADD COLUMN statements have a valid default value.\n"
             "If a NOT NULL constraint is present, make sure it has\n"
