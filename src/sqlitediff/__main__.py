@@ -27,6 +27,7 @@ from .diff import (
     SchemaDiff,
     schema_diff,
 )
+from .escapes import sql_comment
 from .schema import Column, load_schema
 
 
@@ -66,17 +67,15 @@ def sql_diff_checklist(diff: SchemaDiff) -> str:
             "a DEFAULT constraint."
         )
 
-    indent = 6
-    indent_prefix = "--"
-    indent_str = indent_prefix + " " * indent
-    i_end = len(indent_prefix) + indent - 1
+    indent = 5
+    i_end = indent - 1
     i_start = i_end - 3
     for i, message in enumerate(checklist):
-        message = textwrap.indent(message, indent_str)
+        message = textwrap.indent(message, " " * indent)
         message = message[: i_start] + f"{i + 1:>2d}." + message[i_end :]
         checklist[i] = message
 
-    return "\n".join(checklist)
+    return sql_comment("\n".join(checklist))
 
 
 def connect_by_path(path: Union[str, Path]) -> sqlite3.Connection:
