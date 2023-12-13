@@ -72,7 +72,7 @@ def sql_diff_checklist(diff: SchemaDiff) -> str:
     i_start = i_end - 3
     for i, message in enumerate(checklist):
         message = textwrap.indent(message, " " * indent)
-        message = message[: i_start] + f"{i + 1:>2d}." + message[i_end :]
+        message = message[:i_start] + f"{i + 1:>2d}." + message[i_end:]
         checklist[i] = message
 
     return sql_comment("\n".join(checklist))
