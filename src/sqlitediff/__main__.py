@@ -187,6 +187,10 @@ def main():
         f"\n"
         f"{sql}\n"
         f"\n"
+        f"-- Please verify foreign keys before committing!\n"
+        f"-- The following pragma should return 0 rows:\n"
+        f"PRAGMA foreign_key_check;\n"
+        f"\n"
         f"COMMIT;\n",
         end="",
     )
