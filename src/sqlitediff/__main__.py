@@ -18,6 +18,7 @@ import textwrap
 from pathlib import Path
 from typing import List, Union
 
+import sqlitediff
 from .diff import (
     DeletedColumn,
     DeletedTable,
@@ -95,6 +96,12 @@ def main():
         prog=__package__,
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"{__package__} {sqlitediff.__version__}",
     )
     parser.add_argument(
         metavar="from",
