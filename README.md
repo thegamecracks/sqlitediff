@@ -1,5 +1,8 @@
 # sqlitediff
 
+![](https://img.shields.io/github/actions/workflow/status/thegamecracks/sqlitediff/pyright-lint.yml?style=flat-square&label=lint)
+![](https://img.shields.io/github/actions/workflow/status/thegamecracks/sqlitediff/python-test.yml?style=flat-square&logo=pytest&label=tests)
+
 A command-line program for generating SQLite schema diffs.
 
 ```sql
