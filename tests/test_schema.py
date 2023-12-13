@@ -2,11 +2,23 @@ import contextlib
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from sqlitediff.schema import load_schema
 
 
-def test_load_user_group_1():
-    path = Path("examples/user_group_1.sql")
+@pytest.mark.parametrize(
+    "path",
+    [
+        Path("examples/user_group_1.sql"),
+        Path("examples/user_group_2.sql"),
+    ],
+    ids=[
+        "user-group-1",
+        "user-group-2",
+    ],
+)
+def test_load_schema(path: Path):
     with contextlib.closing(sqlite3.connect(":memory:")) as conn:
         conn.executescript(path.read_text())
         schema = load_schema(conn)
@@ -14,26 +26,23 @@ def test_load_user_group_1():
     print(schema)
 
 
-def test_load_user_group_2():
-    path = Path("examples/user_group_2.sql")
+@pytest.mark.parametrize(
+    "old_path,new_path",
+    [
+        (Path("examples/user_group_1.sql"), Path("examples/user_group_2.sql")),
+    ],
+    ids=[
+        "user-group-1-2",
+    ],
+)
+def test_schema_diff(old_path: Path, new_path: Path):
     with contextlib.closing(sqlite3.connect(":memory:")) as conn:
-        conn.executescript(path.read_text())
-        schema = load_schema(conn)
-
-    print(schema)
-
-
-def test_user_group_1_diff_2():
-    path_1 = Path("examples/user_group_1.sql")
-    path_2 = Path("examples/user_group_2.sql")
-
-    with contextlib.closing(sqlite3.connect(":memory:")) as conn:
-        conn.executescript(path_1.read_text())
-        schema_1 = load_schema(conn)
+        conn.executescript(old_path.read_text())
+        old_schema = load_schema(conn)
 
     with contextlib.closing(sqlite3.connect(":memory:")) as conn:
-        conn.executescript(path_2.read_text())
-        schema_2 = load_schema(conn)
+        conn.executescript(new_path.read_text())
+        new_schema = load_schema(conn)
 
-    diff = schema_2.difference(schema_1)
+    diff = new_schema.difference(old_schema)
     print(diff.to_sql())

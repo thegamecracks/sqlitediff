@@ -11,80 +11,35 @@ def table_parser() -> lark.Lark:
     return create_table_parser()
 
 
-def test_one_column(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (x)")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_two_columns(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (x, y)")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_typed_columns(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (x INT, y INT)")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_column_constraint(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (id INTEGER PRIMARY KEY)")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_multi_column_constraint(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (id INTEGER PRIMARY KEY, bar TEXT NOT NULL)")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_multi_constraint_column(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (bar TEXT UNIQUE NOT NULL)")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_table_constraint(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (id, PRIMARY KEY (id))")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_table_and_column_constraint(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (x INTEGER PRIMARY KEY, FOREIGN KEY (id) REFERENCES bar (x))")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_table_option(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (x INTEGER) STRICT")
-    print(tree.pretty())
-
-    tables = TableTransformer().transform(tree).children
-    print(tables)
-
-
-def test_table_options(table_parser: lark.Lark) -> None:
-    tree = table_parser.parse("CREATE TABLE foo (x TEXT PRIMARY KEY) STRICT, WITHOUT ROWID")
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "CREATE TABLE foo (x)",
+        "CREATE TABLE foo (x, y)",
+        "CREATE TABLE foo (x INT, y INT)",
+        "CREATE TABLE foo (id INTEGER PRIMARY KEY)",
+        "CREATE TABLE foo (id INTEGER PRIMARY KEY, bar TEXT NOT NULL)",
+        "CREATE TABLE foo (bar TEXT UNIQUE NOT NULL)",
+        "CREATE TABLE foo (id, PRIMARY KEY (id))",
+        "CREATE TABLE foo (x INTEGER PRIMARY KEY, FOREIGN KEY (id) REFERENCES bar (x))",
+        "CREATE TABLE foo (x INTEGER) STRICT",
+        "CREATE TABLE foo (x TEXT PRIMARY KEY) STRICT, WITHOUT ROWID",
+    ],
+    ids=[
+        "one-column",
+        "two-columns",
+        "typed-columns",
+        "column-constraint",
+        "multi-column-constraint",
+        "multi-constraint-column",
+        "table-constriant",
+        "table-and-column-constraint",
+        "table-option",
+        "table-options",
+    ],
+)
+def test_table_parser(table_parser: lark.Lark, sql: str) -> None:
+    tree = table_parser.parse(sql)
     print(tree.pretty())
 
     tables = TableTransformer().transform(tree).children
