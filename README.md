@@ -65,7 +65,7 @@ PRAGMA foreign_keys = off; -- As initially configured by database
 
 > [!NOTE]
 >
-> This project is not associated with [5f.0](https://github.com/5f0ne)'s
+> This project is not associated with [5f0ne](https://github.com/5f0ne)'s
 > PyPI package, [sqlitediff](https://pypi.org/project/sqlitediff/),
 > which caters towards analysis of data changes in an SQLite database.
 
