@@ -33,11 +33,11 @@ from .schema import Column, load_schema
 
 def valid_column_default(column: Column) -> bool:
     nullable = True
-    null_default = False
+    null_default = True
     for c in column.constraints:
         c = c.upper()
-        nullable = nullable and "NOT NULL" in c
-        null_default = null_default or "DEFAULT" in c and not "DEFAULT NULL" in c
+        nullable = nullable and "NOT NULL" not in c
+        null_default = null_default and ("DEFAULT" not in c or "DEFAULT NULL" in c)
     return nullable or not null_default
 
 
