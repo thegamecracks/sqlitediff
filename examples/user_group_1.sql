@@ -1,3 +1,6 @@
+-- This is an example script to show how sqlitediff works.
+-- Try it out by running:
+-- sqlitediff examples/user_group_1.sql examples/user_group_2.sql
 CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT); -- Add NOT NULL to name later
 CREATE TABLE "group" (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
 CREATE TABLE user_group (

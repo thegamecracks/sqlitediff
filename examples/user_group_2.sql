@@ -1,7 +1,11 @@
--- Update user name constraint
+-- This is an example script to show how sqlitediff works.
+-- Try it out by running:
+-- sqlitediff examples/user_group_1.sql examples/user_group_2.sql
+
+-- Updated user name constraint
 CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
 
--- Add group description column
+-- Added group description column
 CREATE TABLE "group" (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
@@ -14,13 +18,13 @@ CREATE TABLE user_group (
     PRIMARY KEY (user_id, group_id)
 );
 
--- Add index for group users
+-- Added index for group users
 CREATE INDEX ix_group_user ON user_group (group_id, user_id);
 
--- Change index to include ID
+-- Changed index to include ID
 CREATE INDEX ix_user_name ON user (name, id);
 
--- Change kawaii group to ID 2, changing triggers/views
+-- Changed kawaii group to ID 2, changing triggers/views
 INSERT INTO "group" (id, name) VALUES (2, 'kawaii');
 CREATE TRIGGER add_user_to_kawaii_group
     INSERT ON user
@@ -31,7 +35,7 @@ CREATE TRIGGER add_user_to_kawaii_group
 CREATE VIEW user_group_kawaii (id) AS
     SELECT user_id FROM user_group WHERE group_id = 2;
 
--- Add all group as ID 1 with new trigger/view
+-- Added 'all' group as ID 1 with new trigger/view
 INSERT INTO "group" (id, name) VALUES (1, 'all');
 CREATE TRIGGER add_user_to_all_group
     INSERT ON user
