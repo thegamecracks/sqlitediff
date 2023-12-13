@@ -60,7 +60,6 @@ CREATE TRIGGER add_user_to_all_group
     END;
 
 COMMIT;
-PRAGMA foreign_keys = off; -- As initially configured by database
 ```
 
 > [!NOTE]

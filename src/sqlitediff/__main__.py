@@ -123,7 +123,6 @@ def main():
 
     with contextlib.closing(args.conn_new) as conn:
         new_schema = load_schema(conn)
-        foreign_keys = conn.execute("PRAGMA foreign_keys").fetchone()[0] == 1
 
     diff = schema_diff(new_schema, old_schema)
     sql = diff.to_sql()
@@ -139,9 +138,7 @@ def main():
         f"\n"
         f"{sql}\n"
         f"\n"
-        f"COMMIT;\n"
-        f"PRAGMA foreign_keys = {'on' if foreign_keys else 'off'}; "
-        f"-- As initially configured by database\n",
+        f"COMMIT;\n",
         end="",
     )
 
