@@ -19,7 +19,7 @@ CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
 INSERT INTO user (id, name) SELECT * FROM sqlitediff_temp;
 DROP TABLE sqlitediff_temp;
 
--- Restoring associations to user:
+-- Restoring references for user:
 CREATE INDEX ix_user_name ON user (name);
 
 -- Previous view schema for user_group_kawaii:

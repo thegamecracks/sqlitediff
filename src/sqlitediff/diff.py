@@ -30,7 +30,7 @@ class NewTable(Change):
 class ModifiedTable(Change):
     old: Table
     new: Table
-    associations: List[RestoredObject] = field(default_factory=list)
+    references: List[ReferencedObject] = field(default_factory=list)
 
     def to_sql(self) -> str:
         if self.old.sql is None:
@@ -48,9 +48,9 @@ class ModifiedTable(Change):
             f"DROP TABLE sqlitediff_temp;",
         ]
 
-        if len(self.associations) > 0:
+        if len(self.references) > 0:
             sql.append("")
-            sql.append(f"-- Restoring associations for {self.new.raw_name}:")
+            sql.append(f"-- Restoring references for {self.new.raw_name}:")
             sql.extend(a.to_sql() for a in self.references)
 
         return "\n".join(sql)
@@ -134,7 +134,7 @@ class DeletedObject(Change):
 
 
 @dataclass
-class RestoredObject(Change):
+class ReferencedObject(Change):
     sql: str
 
     def to_sql(self) -> str:
@@ -249,12 +249,12 @@ def _object_diff(
     return diff
 
 
-class Association(Protocol):
+class Reference(Protocol):
     name: str
     tbl_name: str
 
 
-def _is_association_modified(o: Association, diff: SchemaDiff) -> bool:
+def _is_reference_modified(o: Reference, diff: SchemaDiff) -> bool:
     for c in diff.modified:
         if isinstance(c, ModifiedObject) and c.name == o.name:
             return True
@@ -264,24 +264,24 @@ def _is_association_modified(o: Association, diff: SchemaDiff) -> bool:
     return False
 
 
-def _add_table_associations(diff: SchemaDiff, objects: Sequence[Association]) -> None:
+def _add_table_references(diff: SchemaDiff, objects: Sequence[Reference]) -> None:
     modified = [c for c in diff.modified if isinstance(c, ModifiedTable)]
 
     # O(n*m*k) tradeoff for code simplicity
-    associations: List[List[Association]] = []
+    references: List[List[Reference]] = []
     for c in modified:
-        arr: List[Association] = []
+        arr: List[Reference] = []
         for o in objects:
             if o.tbl_name != c.new.name:
                 continue
-            if _is_association_modified(o, diff):
+            if _is_reference_modified(o, diff):
                 continue
             arr.append(o)
-        associations.append(arr)
+        references.append(arr)
 
-    for table, objects in zip(modified, associations):
+    for table, objects in zip(modified, references):
         for o in objects:
-            table.associations.append(RestoredObject(str(o)))
+            table.references.append(ReferencedObject(str(o)))
 
 
 def schema_diff(new: Schema, old: Schema) -> SchemaDiff:
@@ -292,8 +292,8 @@ def schema_diff(new: Schema, old: Schema) -> SchemaDiff:
     diff.extend(_object_diff("view", new.views, old.views))
     diff.extend(_object_diff("trigger", new.triggers, old.triggers))
 
-    _add_table_associations(diff, tuple(old.indices.values()))
-    _add_table_associations(diff, tuple(old.views.values()))
-    _add_table_associations(diff, tuple(old.triggers.values()))
+    _add_table_references(diff, tuple(old.indices.values()))
+    _add_table_references(diff, tuple(old.views.values()))
+    _add_table_references(diff, tuple(old.triggers.values()))
 
     return diff
