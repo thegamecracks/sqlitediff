@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqlitediff"
-description = "A command-line program for generating SQLite diffs."
+description = "A command-line program for generating SQLite schema diffs."
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [{ name = "thegamecracks" }]

@@ -1,6 +1,6 @@
 # sqlitediff
 
-A command-line program for generating SQLite diffs.
+A command-line program for generating SQLite schema diffs.
 
 ```sql
 $ sqlitediff examples\user_group_1.sql examples\user_group_2.sql
