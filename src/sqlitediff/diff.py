@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, TypeVar
 
+from .escapes import sql_comment
+
 if TYPE_CHECKING:
     from .schema import Column, Schema, Table
 
@@ -30,11 +32,15 @@ class ModifiedTable(Change):
     new: Table
 
     def to_sql(self) -> str:
+        if self.old.sql is None:
+            raise ValueError(f"No source SQL available for {self.old.name} table")
         if self.new.sql is None:
             raise ValueError(f"No source SQL available for {self.new.name} table")
 
         columns = ", ".join(c.name for c in self.old.columns.values())
         return (
+            f"-- Previous table schema for {self.old.name}:\n"
+            f"{sql_comment(self.old.sql + ';')}\n"
             f"ALTER TABLE {self.old.name} RENAME TO sqlitediff_temp;\n"
             f"{self.new.sql};\n"
             f"INSERT INTO {self.new.name} ({columns}) SELECT * FROM sqlitediff_temp;\n"
@@ -96,10 +102,16 @@ class NewObject(Change):
 class ModifiedObject(Change):
     type: ObjectType
     name: str
-    sql: str = field(repr=False)
+    old: str = field(repr=False)
+    new: str = field(repr=False)
 
     def to_sql(self) -> str:
-        return f"DROP {self.type.upper()} {self.name};\n{self.sql};"
+        return (
+            f"-- Previous {self.type} schema for {self.name}:\n"
+            f"{sql_comment(self.old + ';')}\n"
+            f"DROP {self.type.upper()} {self.name};\n"
+            f"{self.new};"
+        )
 
 
 @dataclass
@@ -206,7 +218,12 @@ def _object_diff(
     for name in new.keys() & old.keys():
         if new[name] != old[name]:
             # FIXME: name must be escaped
-            change = ModifiedObject(type=type, name=name, sql=str(new[name]))
+            change = ModifiedObject(
+                type=type,
+                name=name,
+                old=str(old[name]),
+                new=str(new[name]),
+            )
             diff.modified.append(change)
 
     for name in old.keys() - new.keys():
