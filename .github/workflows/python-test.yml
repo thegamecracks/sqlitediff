@@ -1,0 +1,21 @@
+name: Run pytest
+
+on:
+  push:
+    paths:
+      - 'src/**.py'
+      - 'tests/**.py'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        cache: pip
+        cache-dependency-path: pyproject.toml
+        python-version: '3.8'
+    - run: pip install .[tests]
+    - run: pytest
