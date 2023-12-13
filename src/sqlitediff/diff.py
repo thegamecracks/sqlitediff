@@ -272,7 +272,7 @@ def _add_table_associations(diff: SchemaDiff, objects: Sequence[Association]) ->
     for c in modified:
         arr: List[Association] = []
         for o in objects:
-            if o.tbl_name != c.new.raw_name:
+            if o.tbl_name != c.new.name:
                 continue
             if _is_association_modified(o, diff):
                 continue
