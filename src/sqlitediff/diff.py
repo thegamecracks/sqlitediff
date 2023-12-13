@@ -50,7 +50,7 @@ class ModifiedTable(Change):
 
         if len(self.references) > 0:
             sql.append("")
-            sql.append(f"-- Restoring references for {self.new.raw_name}:")
+            sql.append(f"-- Restoring references to {self.new.raw_name}:")
             sql.extend(a.to_sql() for a in self.references)
 
         return "\n".join(sql)
