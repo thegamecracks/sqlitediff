@@ -3,7 +3,7 @@
 A command-line program for generating SQLite schema diffs.
 
 ```sql
-$ sqlitediff examples\user_group_1.sql examples\user_group_2.sql
+$ sqlitediff examples/user_group_1.sql examples/user_group_2.sql
 PRAGMA foreign_keys = off;
 BEGIN TRANSACTION;
 
