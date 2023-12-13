@@ -42,6 +42,12 @@ class Object:
     sql: str = field(repr=False)
     tbl_name: str
 
+    def __post_init__(self) -> None:
+        # This runtime type checking should arguably be in load_schema()
+        if self.sql is None:
+            cls = type(self).__name__.lower()
+            raise TypeError(f"No SQL available for {cls} {self.name}")
+
     def __str__(self) -> str:
         return self.sql
 
@@ -84,12 +90,11 @@ def _load_table(name: str, sql: str) -> Table:
 
 
 def load_schema(conn: sqlite3.Connection) -> Schema:
-    # fmt: off
-    tables   = conn.execute("SELECT name, tbl_name, sql FROM sqlite_schema WHERE type =   'table'").fetchall()
-    indices  = conn.execute("SELECT name, tbl_name, sql FROM sqlite_schema WHERE type =   'index'").fetchall()
-    views    = conn.execute("SELECT name, tbl_name, sql FROM sqlite_schema WHERE type =    'view'").fetchall()
-    triggers = conn.execute("SELECT name, tbl_name, sql FROM sqlite_schema WHERE type = 'trigger'").fetchall()
-    # fmt: on
+    sql = "SELECT name, tbl_name, sql FROM sqlite_schema WHERE type = ? AND name NOT LIKE 'sqlite_%'"
+    tables = conn.execute(sql, ("table",)).fetchall()
+    indices = conn.execute(sql, ("index",)).fetchall()
+    views = conn.execute(sql, ("view",)).fetchall()
+    triggers = conn.execute(sql, ("trigger",)).fetchall()
     return Schema(
         tables={name: _load_table(name, sql) for name, _, sql in tables},
         indices={name: Index(name, sql, tbl_name) for name, tbl_name, sql in indices},
