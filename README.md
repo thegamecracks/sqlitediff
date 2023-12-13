@@ -19,10 +19,8 @@ CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
 INSERT INTO user (id, name) SELECT * FROM sqlitediff_temp;
 DROP TABLE sqlitediff_temp;
 
--- Previous index schema for ix_user_name:
--- CREATE INDEX ix_user_name ON user (name);
-DROP INDEX IF EXISTS ix_user_name;
-CREATE INDEX ix_user_name ON user (name, id);
+-- Restoring associations to user:
+CREATE INDEX ix_user_name ON user (name);
 
 -- Previous view schema for user_group_kawaii:
 -- CREATE VIEW user_group_kawaii (id) AS
@@ -58,6 +56,10 @@ CREATE TRIGGER add_user_to_all_group
     BEGIN
         INSERT INTO user_group (user_id, group_id) VALUES (new.id, 1);
     END;
+
+-- Please verify foreign keys before committing!
+-- The following pragma should return 0 rows:
+PRAGMA foreign_key_check;
 
 COMMIT;
 ```
