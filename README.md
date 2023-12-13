@@ -59,3 +59,9 @@ CREATE TRIGGER add_user_to_all_group
 COMMIT;
 PRAGMA foreign_keys = off; -- As initially configured by database
 ```
+
+## License
+
+This project is written under the [MIT] license.
+
+[MIT]: /LICENSE
