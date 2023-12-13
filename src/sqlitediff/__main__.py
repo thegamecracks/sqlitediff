@@ -62,6 +62,14 @@ def has_new_and_deleted_columns(diff: SchemaDiff) -> bool:
     return True
 
 
+def column_will_be_dropped(diff: SchemaDiff) -> bool:
+    if contains_type(ModifiedColumn, diff.modified):
+        return True
+    if contains_type(DeletedColumn, diff.deleted):
+        return True
+    return False
+
+
 def valid_column_default(column: Column) -> bool:
     nullable = True
     null_default = True
@@ -92,6 +100,14 @@ def sql_diff_checklist(diff: SchemaDiff) -> str:
             "of existing tables/columns. If this appears to be the case,\n"
             "please replace the corresponding queries with an ALTER TABLE\n"
             "statement to prevent data loss."
+        )
+
+    if column_will_be_dropped(diff):
+        checklist.append(
+            "Any DROP COLUMN statements are not referenced by another\n"
+            "check, foreign key, index, trigger, view, or it has a\n"
+            "PRIMARY KEY or UNIQUE constraint.\n"
+            "https://sqlite.org/lang_altertable.html#alter_table_drop_column"
         )
 
     if not all_column_changes_have_valid_defaults(diff):
