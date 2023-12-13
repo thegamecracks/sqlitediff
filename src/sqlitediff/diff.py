@@ -51,7 +51,7 @@ class ModifiedTable(Change):
         if len(self.associations) > 0:
             sql.append("")
             sql.append(f"-- Restoring associations for {self.new.raw_name}:")
-            sql.extend(a.sql + ";" for a in self.associations)
+            sql.extend(a.to_sql() for a in self.references)
 
         return "\n".join(sql)
 
