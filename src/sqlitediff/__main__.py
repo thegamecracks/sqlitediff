@@ -10,6 +10,11 @@ the best way to migrate a schema without data loss.
 The `from` or `to` arguments can be passed an .sql file instead of
 an SQLite database, in which case the contents will be executed in
 an in-memory database before being compared.
+
+Some checks will be performed on the resulting diff to warn about
+potential issues with the migration script, such as table/column
+renames that sqlitediff cannot detect, and DROP COLUMN constraint
+violations.
 """
 import argparse
 import contextlib
