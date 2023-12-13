@@ -35,9 +35,26 @@ class Table:
     sql: Optional[str] = field(default=None, repr=False)
 
 
-Index = NewType("Index", str)
-View = NewType("View", str)
-Trigger = NewType("Trigger", str)
+@dataclass(repr=False)
+class Object:
+    name: str
+    sql: str
+    tbl_name: str
+
+    def __str__(self) -> str:
+        return self.sql
+
+
+class Index(Object):
+    ...
+
+
+class View(Object):
+    ...
+
+
+class Trigger(Object):
+    ...
 
 
 @dataclass
@@ -66,14 +83,14 @@ def load_tables(sql: str, *, only_one: bool = False) -> List[Table]:
 
 def load_schema(conn: sqlite3.Connection) -> Schema:
     # fmt: off
-    tables   = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type =   'table'").fetchall()
-    indices  = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type =   'index'").fetchall()
-    views    = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type =    'view'").fetchall()
-    triggers = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'trigger'").fetchall()
+    tables   = conn.execute("SELECT name, tbl_name, sql FROM sqlite_schema WHERE type =   'table'").fetchall()
+    indices  = conn.execute("SELECT name, tbl_name, sql FROM sqlite_schema WHERE type =   'index'").fetchall()
+    views    = conn.execute("SELECT name, tbl_name, sql FROM sqlite_schema WHERE type =    'view'").fetchall()
+    triggers = conn.execute("SELECT name, tbl_name, sql FROM sqlite_schema WHERE type = 'trigger'").fetchall()
     # fmt: on
     return Schema(
-        tables={name: load_tables(sql, only_one=True)[0] for name, sql in tables},
-        indices={name: Index(sql) for name, sql in indices},
-        views={name: View(sql) for name, sql in views},
-        triggers={name: Trigger(sql) for name, sql in triggers},
+        tables={name: load_tables(sql, only_one=True)[0] for name, _, sql in tables},
+        indices={name: Index(name, sql, tbl_name) for name, tbl_name, sql in indices},
+        views={name: View(name, sql, tbl_name) for name, tbl_name, sql in views},
+        triggers={name: Trigger(name, sql, tbl_name) for name, tbl_name, sql in triggers},
     )

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, TypeVar
+from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, Sequence, TypeVar
 
 from .escapes import sql_comment
 
@@ -30,6 +30,7 @@ class NewTable(Change):
 class ModifiedTable(Change):
     old: Table
     new: Table
+    associations: List[RestoredObject] = field(default_factory=list)
 
     def to_sql(self) -> str:
         if self.old.sql is None:
@@ -38,14 +39,21 @@ class ModifiedTable(Change):
             raise ValueError(f"No source SQL available for {self.new.name} table")
 
         columns = ", ".join(c.name for c in self.old.columns.values())
-        return (
-            f"-- Previous table schema for {self.old.name}:\n"
-            f"{sql_comment(self.old.sql + ';')}\n"
-            f"ALTER TABLE {self.old.name} RENAME TO sqlitediff_temp;\n"
-            f"{self.new.sql};\n"
-            f"INSERT INTO {self.new.name} ({columns}) SELECT * FROM sqlitediff_temp;\n"
-            f"DROP TABLE sqlitediff_temp;"
-        )
+        sql = [
+            f"-- Previous table schema for {self.old.name}:",
+            f"{sql_comment(self.old.sql + ';')}",
+            f"ALTER TABLE {self.old.name} RENAME TO sqlitediff_temp;",
+            f"{self.new.sql};",
+            f"INSERT INTO {self.new.name} ({columns}) SELECT * FROM sqlitediff_temp;",
+            f"DROP TABLE sqlitediff_temp;",
+        ]
+
+        if len(self.associations) > 0:
+            sql.append("")
+            sql.append(f"-- Restoring associations for {self.new.name}:")
+            sql.extend(a.sql + ";" for a in self.associations)
+
+        return "\n".join(sql)
 
 
 @dataclass
@@ -106,6 +114,7 @@ class ModifiedObject(Change):
     new: str = field(repr=False)
 
     def to_sql(self) -> str:
+        # FIXME: name field is not escaped
         return (
             f"-- Previous {self.type} schema for {self.name}:\n"
             f"{sql_comment(self.old + ';')}\n"
@@ -120,7 +129,16 @@ class DeletedObject(Change):
     name: str
 
     def to_sql(self) -> str:
+        # FIXME: name field is not escaped
         return f"DROP {self.type.upper()} IF EXISTS {self.name};"
+
+
+@dataclass
+class RestoredObject(Change):
+    sql: str
+
+    def to_sql(self) -> str:
+        return self.sql + ";"
 
 
 @dataclass
@@ -217,7 +235,6 @@ def _object_diff(
 
     for name in new.keys() & old.keys():
         if new[name] != old[name]:
-            # FIXME: name must be escaped
             change = ModifiedObject(
                 type=type,
                 name=name,
@@ -227,10 +244,44 @@ def _object_diff(
             diff.modified.append(change)
 
     for name in old.keys() - new.keys():
-        # FIXME: name must be escaped
         diff.deleted.append(DeletedObject(type=type, name=name))
 
     return diff
+
+
+class Association(Protocol):
+    name: str
+    tbl_name: str
+
+
+def _is_association_modified(o: Association, diff: SchemaDiff) -> bool:
+    for c in diff.modified:
+        if isinstance(c, ModifiedObject) and c.name == o.name:
+            return True
+    for c in diff.deleted:
+        if isinstance(c, DeletedObject) and c.name == o.name:
+            return True
+    return False
+
+
+def _add_table_associations(diff: SchemaDiff, objects: Sequence[Association]) -> None:
+    modified = [c for c in diff.modified if isinstance(c, ModifiedTable)]
+
+    # O(n*m*k) tradeoff for code simplicity
+    associations: List[List[Association]] = []
+    for c in modified:
+        arr: List[Association] = []
+        for o in objects:
+            if o.tbl_name != c.new.name:
+                continue
+            if _is_association_modified(o, diff):
+                continue
+            arr.append(o)
+        associations.append(arr)
+
+    for table, objects in zip(modified, associations):
+        for o in objects:
+            table.associations.append(RestoredObject(str(o)))
 
 
 def schema_diff(new: Schema, old: Schema) -> SchemaDiff:
@@ -240,5 +291,9 @@ def schema_diff(new: Schema, old: Schema) -> SchemaDiff:
     diff.extend(_object_diff("index", new.indices, old.indices))
     diff.extend(_object_diff("view", new.views, old.views))
     diff.extend(_object_diff("trigger", new.triggers, old.triggers))
+
+    _add_table_associations(diff, tuple(old.indices.values()))
+    _add_table_associations(diff, tuple(old.views.values()))
+    _add_table_associations(diff, tuple(old.triggers.values()))
 
     return diff
