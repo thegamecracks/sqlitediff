@@ -19,7 +19,7 @@ dependencies = [
 sqlitediff = "sqlitediff.__main__:main"
 
 [project.optional-dependencies]
-dev = [
+tests = [
     "pytest>=7.4.3",
 ]
 
