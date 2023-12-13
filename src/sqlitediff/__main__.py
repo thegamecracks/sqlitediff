@@ -6,13 +6,17 @@ This tool is intended to help with schema migrations when
 a migration script wasn't hand-crafted beforehand, and should
 not be used for automated migrations as it cannot determine
 the best way to migrate a schema without data loss.
+
+The `from` or `to` arguments can be passed an .sql file instead of
+an SQLite database, in which case the contents will be executed in
+an in-memory database before being compared.
 """
 import argparse
 import contextlib
 import sqlite3
 import textwrap
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from .diff import (
     DeletedColumn,
@@ -75,6 +79,18 @@ def sql_diff_checklist(diff: SchemaDiff) -> str:
     return "\n".join(checklist)
 
 
+def connect_by_path(path: Union[str, Path]) -> sqlite3.Connection:
+    path = Path(path)
+
+    if path.suffix.endswith(".sql"):
+        conn = sqlite3.connect(":memory:")
+        conn.executescript(path.read_text("utf-8"))
+    else:
+        conn = sqlite3.connect(path)
+
+    return conn
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog=__package__,
@@ -83,23 +99,23 @@ def main():
     )
     parser.add_argument(
         metavar="from",
-        dest="old",
+        dest="conn_old",
         help="The database with the old schema to be updated",
-        type=Path,
+        type=connect_by_path,
     )
     parser.add_argument(
         metavar="to",
-        dest="new",
+        dest="conn_new",
         help="The database with the newer schema to update to",
-        type=Path,
+        type=connect_by_path,
     )
 
     args = parser.parse_args()
 
-    with contextlib.closing(sqlite3.connect(args.old)) as conn:
+    with contextlib.closing(args.conn_old) as conn:
         old_schema = load_schema(conn)
 
-    with contextlib.closing(sqlite3.connect(args.new)) as conn:
+    with contextlib.closing(args.conn_new) as conn:
         new_schema = load_schema(conn)
         foreign_keys = conn.execute("PRAGMA foreign_keys").fetchone()[0] == 1
 
