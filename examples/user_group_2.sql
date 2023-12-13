@@ -21,8 +21,7 @@ CREATE TABLE user_group (
 -- Added index for group users
 CREATE INDEX ix_group_user ON user_group (group_id, user_id);
 
--- Changed index to include ID
-CREATE INDEX ix_user_name ON user (name, id);
+CREATE INDEX ix_user_name ON user (name);
 
 -- Changed kawaii group to ID 2, changing triggers/views
 INSERT INTO "group" (id, name) VALUES (2, 'kawaii');
