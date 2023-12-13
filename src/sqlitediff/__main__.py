@@ -79,7 +79,7 @@ def all_column_changes_have_valid_defaults(diff: SchemaDiff) -> bool:
     for c in filter_type(ModifiedColumn, diff.modified):
         if not valid_column_default(c.new):
             return False
-    return False
+    return True
 
 
 def sql_diff_checklist(diff: SchemaDiff) -> str:
