@@ -73,7 +73,7 @@ class ModifiedColumn(Change):
 
     def to_sql(self) -> str:
         raise TypeError(
-            f"Column ({self.new.name}) for table {self.table.name} cannot be modified "
+            f"Column {self.new.name} for table {self.table.name} cannot be modified "
             f"in-place as SQLite does not support it."
         )
 
