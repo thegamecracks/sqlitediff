@@ -65,10 +65,12 @@ def load_tables(sql: str, *, only_one: bool = False) -> List[Table]:
 
 
 def load_schema(conn: sqlite3.Connection) -> Schema:
+    # fmt: off
     tables = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'table'").fetchall()
     indices = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'index'").fetchall()
     views = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'view'").fetchall()
     triggers = conn.execute("SELECT name, sql FROM sqlite_schema WHERE type = 'trigger'").fetchall()
+    # fmt: on
     return Schema(
         tables={name: load_tables(sql, only_one=True)[0] for name, sql in tables},
         indices={name: Index(sql) for name, sql in indices},

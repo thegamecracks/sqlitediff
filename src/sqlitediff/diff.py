@@ -138,7 +138,7 @@ class SchemaDiff:
         grouped_changes = {
             "modified": self.modified,
             "deleted": self.deleted,
-            "new": self.new
+            "new": self.new,
         }
 
         grouped_statements: List[str] = []

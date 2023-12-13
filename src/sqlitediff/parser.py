@@ -29,7 +29,10 @@ class TableTransformer(lark.Transformer):
 
     def column(self, children):
         from .schema import Column
-        if len(children) < 2: children.append(None)
+
+        if len(children) < 2:
+            children.append(None)
+
         return Column(name=children[0], type=children[1], constraints=set(children[2:]))
 
     def columns(self, children):
@@ -49,8 +52,12 @@ class TableTransformer(lark.Transformer):
 
     def create_table(self, children):
         from .schema import Table
-        if len(children) < 3: children.append(set())
-        if len(children) < 4: children.append(set())
+
+        if len(children) < 3:
+            children.append(set())
+        if len(children) < 4:
+            children.append(set())
+
         return Table(
             name=children[0],
             columns=children[1],
