@@ -170,6 +170,10 @@ class SchemaDiff:
     modified: List[Change]
     deleted: List[Change]
 
+    @property
+    def total_changes(self) -> int:
+        return len(self.new) + len(self.modified) + len(self.deleted)
+
     def extend(self, diff: SchemaDiff) -> None:
         self.new.extend(diff.new)
         self.modified.extend(diff.modified)

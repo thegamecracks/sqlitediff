@@ -204,7 +204,7 @@ def main():
 
     diff = schema_diff(new_schema, old_schema)
 
-    if not any((diff.new, diff.modified, diff.deleted)):
+    if diff.total_changes == 0:
         return print("-- No differences found")
 
     sql = diff.to_sql()
