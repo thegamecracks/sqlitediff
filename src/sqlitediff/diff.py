@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, Sequence, TypeVar
 
-from .escapes import sql_comment
+from .escapes import sql_comment, sql_identifier
 
 if TYPE_CHECKING:
     from .schema import Column, Schema, Table
@@ -123,11 +123,11 @@ class ModifiedObject(Change):
     new: str = field(repr=False)
 
     def to_sql(self) -> str:
-        # FIXME: name field is not escaped
+        name = sql_identifier(self.name, as_needed=True)
         return (
             f"-- Previous {self.type} schema for {self.name}:\n"
             f"{sql_comment(self.old + ';')}\n"
-            f"DROP {self.type.upper()} IF EXISTS {self.name};\n"
+            f"DROP {self.type.upper()} IF EXISTS {name};\n"
             f"{self.new};"
         )
 
@@ -138,8 +138,8 @@ class DeletedObject(Change):
     name: str
 
     def to_sql(self) -> str:
-        # FIXME: name field is not escaped
-        return f"DROP {self.type.upper()} IF EXISTS {self.name};"
+        name = sql_identifier(self.name, as_needed=True)
+        return f"DROP {self.type.upper()} IF EXISTS {name};"
 
 
 @dataclass
