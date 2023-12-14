@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import (
     TYPE_CHECKING,
@@ -18,6 +19,8 @@ from .escapes import sql_comment, sql_identifier
 
 if TYPE_CHECKING:
     from .schema import Column, Schema, Table
+
+log = logging.getLogger(__name__)
 
 K = TypeVar("K")
 T = TypeVar("T")
@@ -252,6 +255,7 @@ def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
     diff = SchemaDiff(new=[], modified=[], deleted=[])
 
     for name in new.keys() - old.keys():
+        log.info("New table: %s", name)
         diff.new.append(NewTable(new[name]))
 
     for name in new.keys() & old.keys():
@@ -259,14 +263,20 @@ def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
         old_table = old[name]
 
         column_diff: Optional[SchemaDiff] = None
-        must_recreate_table = (
-            new_table.constraints != old_table.constraints
-            or new_table.options != old_table.options
-        )
+        must_recreate_table = False
+
+        if new_table.constraints != old_table.constraints:
+            log.info("Modified table constraints: %s", name)
+            must_recreate_table = True
+
+        if new_table.options != old_table.options:
+            log.info("Modified table options: %s", name)
+            must_recreate_table = True
 
         if not must_recreate_table:
             column_diff = _column_diff(new_table, new_table.columns, old_table.columns)
             if len(column_diff.modified) > 0:
+                log.info("Modified table columns: %s", name)
                 must_recreate_table = True
 
         if not must_recreate_table:
@@ -274,6 +284,7 @@ def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
             new_columns = new_table.columns
             old_columns = old_table.columns
             if not _diff_matches_column_order(column_diff, new_columns, old_columns):
+                log.info("Modified table: %s (re-ordered columns)", name)
                 must_recreate_table = True
 
         if must_recreate_table:
@@ -283,6 +294,7 @@ def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
             diff.extend(column_diff)
 
     for name in old.keys() - new.keys():
+        log.info("Deleted table: %s", name)
         diff.deleted.append(DeletedTable(old[name]))
 
     return diff
@@ -296,10 +308,12 @@ def _object_diff(
     diff = SchemaDiff(new=[], modified=[], deleted=[])
 
     for name in new.keys() - old.keys():
+        log.info("New %s: %s", type, name)
         diff.new.append(NewObject(str(new[name])))
 
     for name in new.keys() & old.keys():
         if new[name] != old[name]:
+            log.info("Modified %s: %s", type, name)
             change = ModifiedObject(
                 type=type,
                 name=name,
@@ -309,6 +323,7 @@ def _object_diff(
             diff.modified.append(change)
 
     for name in old.keys() - new.keys():
+        log.info("Deleted %s: %s", type, name)
         diff.deleted.append(DeletedObject(type=type, name=name))
 
     return diff
@@ -346,6 +361,7 @@ def _add_table_references(diff: SchemaDiff, objects: Sequence[Reference]) -> Non
 
     for table, objects in zip(modified, references):
         for o in objects:
+            log.info("%s to restore: %s", type(o).__name__, o.name)
             table.references.append(ReferencedObject(str(o)))
 
 
