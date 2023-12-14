@@ -39,13 +39,22 @@ class ModifiedTable(Change):
             raise ValueError(f"No source SQL available for {self.new.raw_name} table")
 
         columns = ", ".join(c.raw_name for c in self.old.columns.values())
+
+        new_sql_temp = self.new.sql.replace(
+            f"CREATE TABLE {self.new.raw_name}",
+            "CREATE TABLE sqlitediff_temp",
+            1
+        )
+        if new_sql_temp == self.new.sql:
+            raise ValueError(f"Table {self.new.name} SQL does not match name")
+
         sql = [
             f"-- Previous table schema for {self.old.raw_name}:",
             f"{sql_comment(self.old.sql + ';')}",
-            f"ALTER TABLE {self.old.raw_name} RENAME TO sqlitediff_temp;",
-            f"{self.new.sql};",
+            f"{new_sql_temp};",
             f"INSERT INTO {self.new.raw_name} ({columns}) SELECT * FROM sqlitediff_temp;",
-            f"DROP TABLE sqlitediff_temp;",
+            f"DROP TABLE {self.old.raw_name};",
+            f"ALTER TABLE sqlitediff_temp RENAME TO {self.new.raw_name};",
         ]
 
         if len(self.references) > 0:
