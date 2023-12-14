@@ -1,14 +1,26 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Literal, Protocol, Sequence, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Protocol,
+    Sequence,
+    TypeVar,
+)
 
 from .escapes import sql_comment, sql_identifier
 
 if TYPE_CHECKING:
     from .schema import Column, Schema, Table
 
+K = TypeVar("K")
 T = TypeVar("T")
+V = TypeVar("V")
 
 
 class Change(Protocol):
@@ -181,6 +193,17 @@ class SchemaDiff:
         return "\n\n".join(grouped_statements)
 
 
+def _dict_diff(new: Dict[K, V], old: Iterable[Any]) -> Dict[K, V]:
+    # Unlike new.keys() - old.keys(), this retains order
+    new = new.copy()
+    for key in old:
+        try:
+            new.pop(key)
+        except KeyError:
+            pass
+    return new
+
+
 def _column_diff(
     table: Table,
     new: Dict[str, Column],
@@ -188,14 +211,14 @@ def _column_diff(
 ) -> SchemaDiff:
     diff = SchemaDiff(new=[], modified=[], deleted=[])
 
-    for name in new.keys() - old.keys():
+    for name in _dict_diff(new, old):
         diff.new.append(NewColumn(table, new[name]))
 
     for name in new.keys() & old.keys():
         if new[name] != old[name]:
             diff.modified.append(ModifiedColumn(table, old[name], new[name]))
 
-    for name in old.keys() - new.keys():
+    for name in _dict_diff(old, new):
         diff.deleted.append(DeletedColumn(table, old[name]))
 
     return diff
