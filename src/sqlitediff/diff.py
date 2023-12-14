@@ -8,6 +8,7 @@ from typing import (
     Iterable,
     List,
     Literal,
+    Optional,
     Protocol,
     Sequence,
     TypeVar,
@@ -224,6 +225,24 @@ def _column_diff(
     return diff
 
 
+def _diff_matches_column_order(
+    diff: SchemaDiff,
+    new: Dict[str, Column],
+    old: Dict[str, Column],
+) -> bool:
+    altered = old.copy()
+
+    for c in diff.deleted:
+        if isinstance(c, DeletedColumn):
+            del altered[c.column.raw_name]
+
+    for c in diff.new:
+        if isinstance(c, NewColumn):
+            altered[c.column.raw_name] = c.column
+
+    return tuple(altered) == tuple(new)
+
+
 def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
     diff = SchemaDiff(new=[], modified=[], deleted=[])
 
@@ -234,6 +253,7 @@ def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
         new_table = new[name]
         old_table = old[name]
 
+        column_diff: Optional[SchemaDiff] = None
         must_recreate_table = (
             new_table.constraints != old_table.constraints
             or new_table.options != old_table.options
@@ -243,11 +263,19 @@ def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
             column_diff = _column_diff(new_table, new_table.columns, old_table.columns)
             if len(column_diff.modified) > 0:
                 must_recreate_table = True
-            else:
-                diff.extend(column_diff)
+
+        if not must_recreate_table:
+            assert column_diff is not None
+            new_columns = new_table.columns
+            old_columns = old_table.columns
+            if not _diff_matches_column_order(column_diff, new_columns, old_columns):
+                must_recreate_table = True
 
         if must_recreate_table:
             diff.modified.append(ModifiedTable(old_table, new_table))
+        else:
+            assert column_diff is not None
+            diff.extend(column_diff)
 
     for name in old.keys() - new.keys():
         diff.deleted.append(DeletedTable(old[name]))
