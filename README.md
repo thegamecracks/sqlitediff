@@ -93,7 +93,7 @@ potential issues with the output script such as table/column renames.
 Assuming you have Python 3.8+ and Git, you can install this library with:
 
 ```sh
-pip install git+https://github.com/thegamecracks/sqlitediff
+pip install git+https://github.com/thegamecracks/sqlitediff@v0.1.0
 ```
 
 After installation, the command-line interface can be used with `sqlitediff`
