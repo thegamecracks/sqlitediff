@@ -18,6 +18,7 @@ violations.
 """
 import argparse
 import contextlib
+import logging
 import sqlite3
 import textwrap
 from pathlib import Path
@@ -146,11 +147,31 @@ def connect_by_path(path: Union[str, Path]) -> sqlite3.Connection:
     return conn
 
 
+def configure_logging(verbose: int) -> None:
+    if verbose == 0:
+        return
+    elif verbose == 1:
+        level = logging.INFO
+    else:
+        level = logging.DEBUG
+
+    logging.basicConfig(
+        format="-- %(levelname)s: %(message)-50s (%(name)s)",
+        level=level,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog=__package__,
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        help="Increase logging verbosity",
     )
     parser.add_argument(
         "-V",
@@ -172,6 +193,8 @@ def main():
     )
 
     args = parser.parse_args()
+
+    configure_logging(args.verbose)
 
     with contextlib.closing(args.conn_old) as conn:
         old_schema = load_schema(conn)
