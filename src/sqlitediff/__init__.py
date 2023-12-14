@@ -30,4 +30,4 @@ from .schema import (
     load_schema,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
