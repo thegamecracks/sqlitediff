@@ -81,9 +81,10 @@ potential issues with the output script such as table/column renames.
 >
 > Do not run sqlitediff's output on a production database un-modified
 > without first verifying that the script works on a copy. Some modifications
-> may require execution in a particular order, and can cause constraint
-> violations or data loss. In the worst-case scenario, you can use the
-> output as a reference for figuring out what changes occurred.
+> by themselves can cause constraint violations or data loss due to ambiguity
+> in how the changes should be applied or the order in which they are executed.
+> In the worst-case scenario, you can use the output as a reference to write
+> your own migration script.
 
 [`sqlite_schema`]: https://sqlite.org/schematab.html
 [ALTER TABLE]: https://sqlite.org/lang_altertable.html
