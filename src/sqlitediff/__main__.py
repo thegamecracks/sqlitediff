@@ -180,6 +180,10 @@ def main():
         new_schema = load_schema(conn)
 
     diff = schema_diff(new_schema, old_schema)
+
+    if not any((diff.new, diff.modified, diff.deleted)):
+        return print("-- No differences found")
+
     sql = diff.to_sql()
 
     checklist = sql_diff_checklist(diff)
