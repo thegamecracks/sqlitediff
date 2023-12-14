@@ -51,7 +51,8 @@ class ModifiedTable(Change):
         if self.new.sql is None:
             raise ValueError(f"No source SQL available for {self.new.raw_name} table")
 
-        columns = ", ".join(c.raw_name for c in self.old.columns.values())
+        common_columns = self.new.columns.keys() & self.old.columns.keys()
+        columns = ", ".join(self.old.columns[name].raw_name for name in common_columns)
 
         new_sql_temp = self.new.sql.replace(
             f"CREATE TABLE {self.new.raw_name}",
