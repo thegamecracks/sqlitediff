@@ -5,6 +5,12 @@
 
 A command-line program for generating SQLite schema diffs.
 
+> [!NOTE]
+>
+> This project is not associated with [5f0ne](https://github.com/5f0ne)'s
+> PyPI package, [sqlitediff](https://pypi.org/project/sqlitediff/),
+> which caters towards analysis of data changes in an SQLite database.
+
 ```sql
 $ sqlitediff examples/user_group_1.sql examples/user_group_2.sql
 PRAGMA foreign_keys = off;
@@ -64,11 +70,23 @@ PRAGMA foreign_key_check;
 COMMIT;
 ```
 
-> [!NOTE]
+sqlitediff uses the [`sqlite_schema`] table to read your database structure
+and compare differences between tables, indices, views, and triggers.
+It can parse DDL for tables to determine new, modified, or deleted columns
+and tries to produce [ALTER TABLE] statements where supported by SQLite.
+Additionally, recommendations will be provided if sqlitediff detects
+potential issues with the output script such as table/column renames.
+
+> [!WARNING]
 >
-> This project is not associated with [5f0ne](https://github.com/5f0ne)'s
-> PyPI package, [sqlitediff](https://pypi.org/project/sqlitediff/),
-> which caters towards analysis of data changes in an SQLite database.
+> Do not run sqlitediff's output on a production database un-modified
+> without first verifying that the script works on a copy. Some modifications
+> may require execution in a particular order, and can cause constraint
+> violations or data loss. In the worst-case scenario, you can use the
+> output as a reference for figuring out what changes occurred.
+
+[`sqlite_schema`]: https://sqlite.org/schematab.html
+[ALTER TABLE]: https://sqlite.org/lang_altertable.html
 
 ## Usage
 
@@ -81,7 +99,7 @@ pip install git+https://github.com/thegamecracks/sqlitediff
 After installation, the command-line interface can be used with `sqlitediff`
 or `python -m sqlitediff`. It can compare SQLite database files directly
 or take .sql scripts which are executed in-memory before comparison.
-See [`sqlitediff --help`](/src/sqlitediff/__main__.py) for more information.
+Run [`sqlitediff --help`](/src/sqlitediff/__main__.py) for more information.
 
 ## License
 
