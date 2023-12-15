@@ -40,13 +40,17 @@ class TableTransformer(lark.Transformer):
         return {column.raw_name: column for column in children}
 
     def table_constraint(self, children):
-        return " ".join(children)
+        from .schema import TableConstraint
+
+        return TableConstraint(" ".join(children))
 
     def table_constraints(self, children):
         return set(children)
 
     def table_option(self, children):
-        return " ".join(children)
+        from .schema import TableOption
+
+        return TableOption(" ".join(children))
 
     def table_options(self, children):
         return set(children)
