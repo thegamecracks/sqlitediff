@@ -91,7 +91,7 @@ potential issues with the output script such as table/column renames.
 
 ## Usage
 
-Assuming you have Python 3.8+ and Git, you can install this library with:
+Assuming you have Python 3.8+ and Git, you can install this application with:
 
 ```sh
 pip install git+https://github.com/thegamecracks/sqlitediff@v0.1.5
