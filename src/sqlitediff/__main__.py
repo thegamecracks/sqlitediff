@@ -190,6 +190,7 @@ def main():
         "-v",
         "--verbose",
         action="count",
+        default=0,
         help="Increase logging verbosity",
     )
     parser.add_argument(
