@@ -165,11 +165,13 @@ def configure_logging(verbose: int) -> None:
     if verbose == 0:
         return
     elif verbose == 1:
+        fmt = "%(levelname)s: %(message)s"
         level = logging.INFO
     else:
+        fmt = "%(levelname)s: %(message)-50s (%(name)s)"
         level = logging.DEBUG
 
-    formatter = CommentFormatter(fmt="%(levelname)s: %(message)-50s (%(name)s)")
+    formatter = CommentFormatter(fmt=fmt)
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
 
