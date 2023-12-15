@@ -7,7 +7,7 @@ from typing import Dict, List, NewType, Optional, Set, cast
 from .diff import SchemaDiff, schema_diff
 from .parser import TableTransformer, create_table_parser
 
-ColumnOption = NewType("ColumnOption", str)
+ColumnConstraint = NewType("ColumnConstraint", str)
 TableConstraint = NewType("TableConstraint", str)
 TableOption = NewType("TableOption", str)
 
@@ -16,7 +16,7 @@ TableOption = NewType("TableOption", str)
 class Column:
     raw_name: str
     type: Optional[str]
-    constraints: Set[ColumnOption] = field(hash=False)
+    constraints: Set[ColumnConstraint] = field(hash=False)
 
     def to_sql(self) -> str:
         parts = [self.raw_name]

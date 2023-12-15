@@ -34,10 +34,10 @@ class TableTransformer(lark.Transformer):
         return " ".join(children)
 
     def column(self, children: List[str]) -> Column:
-        from .schema import Column, ColumnOption
+        from .schema import Column, ColumnConstraint
 
         type = children[1] if len(children) > 1 else None
-        constraints = set(ColumnOption(c) for c in children[2:])
+        constraints = set(ColumnConstraint(c) for c in children[2:])
         return Column(raw_name=children[0], type=type, constraints=constraints)
 
     def columns(self, children: List[Column]) -> Dict[str, Column]:

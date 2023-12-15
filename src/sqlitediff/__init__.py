@@ -19,7 +19,7 @@ from .diff import (
 )
 from .schema import (
     Column,
-    ColumnOption,
+    ColumnConstraint,
     Index,
     Schema,
     Table,
