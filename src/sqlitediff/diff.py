@@ -69,7 +69,7 @@ class ModifiedTable(Change):
             f"-- Previous table schema for {self.old.raw_name}:",
             f"{sql_comment(self.old.sql + ';')}",
             f"{new_sql_temp};",
-            f"INSERT INTO sqlitediff_temp ({columns}) SELECT * FROM {self.old.raw_name};",
+            f"INSERT INTO sqlitediff_temp ({columns}) SELECT {columns} FROM {self.old.raw_name};",
             f"DROP TABLE {self.old.raw_name};",
             f"ALTER TABLE sqlitediff_temp RENAME TO {self.new.raw_name};",
         ]
