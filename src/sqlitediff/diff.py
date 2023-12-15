@@ -261,8 +261,6 @@ def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
     for name in new.keys() & old.keys():
         new_table = new[name]
         old_table = old[name]
-
-        column_diff: Optional[SchemaDiff] = None
         must_recreate_table = False
 
         if new_table.constraints != old_table.constraints:
@@ -273,24 +271,20 @@ def _table_diff(new: Dict[str, Table], old: Dict[str, Table]) -> SchemaDiff:
             log.info("Modified table options: %s", name)
             must_recreate_table = True
 
-        if not must_recreate_table:
-            column_diff = _column_diff(new_table, new_table.columns, old_table.columns)
-            if len(column_diff.modified) > 0:
-                log.info("Modified table columns: %s", name)
-                must_recreate_table = True
+        column_diff = _column_diff(new_table, new_table.columns, old_table.columns)
+        if len(column_diff.modified) > 0:
+            log.info("Modified table columns: %s", name)
+            must_recreate_table = True
 
-        if not must_recreate_table:
-            assert column_diff is not None
-            new_columns = new_table.columns
-            old_columns = old_table.columns
-            if not _diff_matches_column_order(column_diff, new_columns, old_columns):
-                log.info("Modified table: %s (re-ordered columns)", name)
-                must_recreate_table = True
+        new_columns = new_table.columns
+        old_columns = old_table.columns
+        if not _diff_matches_column_order(column_diff, new_columns, old_columns):
+            log.info("Re-ordered table columns: %s", name)
+            must_recreate_table = True
 
         if must_recreate_table:
             diff.modified.append(ModifiedTable(old_table, new_table))
         else:
-            assert column_diff is not None
             diff.extend(column_diff)
 
     for name in old.keys() - new.keys():
