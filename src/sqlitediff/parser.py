@@ -28,12 +28,13 @@ class TableTransformer(lark.Transformer):
         return " ".join(children)
 
     def column(self, children):
-        from .schema import Column
+        from .schema import Column, ColumnOption
 
         if len(children) < 2:
             children.append(None)
 
-        return Column(raw_name=children[0], type=children[1], constraints=set(children[2:]))
+        constraints = set(ColumnOption(c) for c in children[2:])
+        return Column(raw_name=children[0], type=children[1], constraints=constraints)
 
     def columns(self, children):
         return {column.raw_name: column for column in children}
