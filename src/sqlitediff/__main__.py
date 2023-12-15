@@ -155,6 +155,12 @@ def connect_by_path(path: Union[str, Path]) -> sqlite3.Connection:
     return conn
 
 
+class CommentFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        message = super().format(record)
+        return sql_comment(message)
+
+
 def configure_logging(verbose: int) -> None:
     if verbose == 0:
         return
@@ -163,10 +169,13 @@ def configure_logging(verbose: int) -> None:
     else:
         level = logging.DEBUG
 
-    logging.basicConfig(
-        format="-- %(levelname)s: %(message)-50s (%(name)s)",
-        level=level,
-    )
+    formatter = CommentFormatter(fmt="%(levelname)s: %(message)-50s (%(name)s)")
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+
+    log = logging.getLogger()
+    log.addHandler(handler)
+    log.setLevel(level)
 
 
 def main():
