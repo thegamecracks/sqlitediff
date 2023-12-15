@@ -59,7 +59,7 @@ class ModifiedTable(Change):
         new_sql_temp = self.new.sql.replace(
             f"CREATE TABLE {self.new.raw_name}",
             "CREATE TABLE sqlitediff_temp",
-            1
+            1,
         )
         if new_sql_temp == self.new.sql:
             raise ValueError(f"Table {self.new.name} SQL does not match name")
