@@ -37,6 +37,8 @@ from .diff import (
 from .escapes import sql_comment
 from .schema import Column, load_schema
 
+log = logging.getLogger(__name__)
+
 T = TypeVar("T")
 
 
@@ -86,12 +88,18 @@ def valid_column_default(column: Column) -> bool:
     return nullable or not null_default
 
 
+def _log_invalid_default(table: str, column: str) -> None:
+    log.info("%s.%s default may be invalid", table, column, stacklevel=2)
+
+
 def all_column_changes_have_valid_defaults(diff: SchemaDiff) -> bool:
     for c in filter_type(NewColumn, diff.new):
         if not valid_column_default(c.column):
+            _log_invalid_default(c.table.raw_name, c.column.raw_name)
             return False
     for c in filter_type(ModifiedColumn, diff.modified):
         if not valid_column_default(c.new):
+            _log_invalid_default(c.table.raw_name, c.new.raw_name)
             return False
     return True
 
