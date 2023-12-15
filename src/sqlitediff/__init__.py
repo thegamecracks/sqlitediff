@@ -14,6 +14,7 @@ from .diff import (
     NewObject,
     NewTable,
     ObjectType,
+    ReferencedObject,
     SchemaDiff,
     schema_diff,
 )
