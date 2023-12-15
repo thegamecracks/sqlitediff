@@ -9,7 +9,6 @@ from typing import (
     Iterable,
     List,
     Literal,
-    Optional,
     Protocol,
     Sequence,
     TypeVar,
