@@ -21,7 +21,7 @@ BEGIN TRANSACTION;
 -- Previous table schema for user:
 -- CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT);
 CREATE TABLE sqlitediff_temp (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
-INSERT INTO sqlitediff_temp (id, name) SELECT * FROM user;
+INSERT INTO sqlitediff_temp (id, name) SELECT id, name FROM user;
 DROP TABLE user;
 ALTER TABLE sqlitediff_temp RENAME TO user;
 
