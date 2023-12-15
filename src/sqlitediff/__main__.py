@@ -168,7 +168,7 @@ def configure_logging(verbose: int) -> None:
         fmt = "%(levelname)s: %(message)s"
         level = logging.INFO
     else:
-        fmt = "%(levelname)s: %(message)-50s (%(name)s)"
+        fmt = "%(levelname)s: %(message)-50s (%(name)s#L%(lineno)d)"
         level = logging.DEBUG
 
     formatter = CommentFormatter(fmt=fmt)
