@@ -327,17 +327,25 @@ class Reference(Protocol):
     tbl_name: str
 
 
-def _is_reference_modified(o: Reference, diff: SchemaDiff) -> bool:
+def _is_reference_modified(o: Reference, type: ObjectType, diff: SchemaDiff) -> bool:
     for c in diff.modified:
-        if isinstance(c, ModifiedObject) and c.name == o.name:
+        if not isinstance(c, ModifiedObject):
+            continue
+        if c.type == type and c.name == o.name:
             return True
     for c in diff.deleted:
-        if isinstance(c, DeletedObject) and c.name == o.name:
+        if not isinstance(c, DeletedObject):
+            continue
+        if c.type == type and c.name == o.name:
             return True
     return False
 
 
-def _add_table_references(diff: SchemaDiff, objects: Sequence[Reference]) -> None:
+def _add_table_references(
+    diff: SchemaDiff,
+    type_: ObjectType,
+    objects: Sequence[Reference],
+) -> None:
     modified = [c for c in diff.modified if isinstance(c, ModifiedTable)]
 
     # O(n*m*k) tradeoff for code simplicity
@@ -347,7 +355,7 @@ def _add_table_references(diff: SchemaDiff, objects: Sequence[Reference]) -> Non
         for o in objects:
             if o.tbl_name != c.new.name:
                 continue
-            if _is_reference_modified(o, diff):
+            if _is_reference_modified(o, type_, diff):
                 continue
             arr.append(o)
         references.append(arr)
@@ -366,8 +374,8 @@ def schema_diff(new: Schema, old: Schema) -> SchemaDiff:
     diff.extend(_object_diff("view", new.views, old.views))
     diff.extend(_object_diff("trigger", new.triggers, old.triggers))
 
-    _add_table_references(diff, tuple(old.indices.values()))
-    _add_table_references(diff, tuple(old.views.values()))
-    _add_table_references(diff, tuple(old.triggers.values()))
+    _add_table_references(diff, "index", tuple(old.indices.values()))
+    _add_table_references(diff, "view", tuple(old.views.values()))
+    _add_table_references(diff, "trigger", tuple(old.triggers.values()))
 
     return diff
