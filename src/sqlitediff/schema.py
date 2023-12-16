@@ -90,7 +90,11 @@ def _load_table(name: str, sql: str) -> Table:
 
 
 def load_schema(conn: sqlite3.Connection) -> Schema:
-    sql = "SELECT name, tbl_name, sql FROM sqlite_schema WHERE type = ? AND name NOT LIKE 'sqlite_%'"
+    sql = (
+        "SELECT name, tbl_name, sql FROM sqlite_schema "
+        "WHERE type = ? AND name NOT LIKE 'sqlite_%' "
+        "ORDER BY name"
+    )
     tables = conn.execute(sql, ("table",)).fetchall()
     indices = conn.execute(sql, ("index",)).fetchall()
     views = conn.execute(sql, ("view",)).fetchall()
