@@ -24,6 +24,8 @@ def table_parser() -> lark.Lark:
         "CREATE TABLE foo (x INTEGER PRIMARY KEY, FOREIGN KEY (id) REFERENCES bar (x))",
         "CREATE TABLE foo (x INTEGER) STRICT",
         "CREATE TABLE foo (x TEXT PRIMARY KEY) STRICT, WITHOUT ROWID",
+        'CREATE TABLE "foo" (x)',
+        'CREATE TABLE "foo ""bar""" (x)',
     ],
     ids=[
         "one-column",
@@ -36,6 +38,8 @@ def table_parser() -> lark.Lark:
         "table-and-column-constraint",
         "table-option",
         "table-options",
+        "quoted-table-name",
+        "quotes-in-quoted-table-name",
     ],
 )
 def test_table_parser(table_parser: lark.Lark, sql: str) -> None:
