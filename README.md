@@ -94,7 +94,7 @@ potential issues with the output script such as table/column renames.
 Assuming you have Python 3.8+ and Git, you can install this application with:
 
 ```sh
-pip install git+https://github.com/thegamecracks/sqlitediff@v0.1.5
+pip install git+https://github.com/thegamecracks/sqlitediff@v0.1.6
 ```
 
 After installation, the command-line interface can be used with `sqlitediff`
