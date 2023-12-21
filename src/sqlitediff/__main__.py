@@ -93,15 +93,16 @@ def _log_invalid_default(table: str, column: str) -> None:
 
 
 def all_column_changes_have_valid_defaults(diff: SchemaDiff) -> bool:
+    ret = True
     for c in filter_type(NewColumn, diff.new):
         if not valid_column_default(c.column):
             _log_invalid_default(c.table.raw_name, c.column.raw_name)
-            return False
+            ret = False
     for c in filter_type(ModifiedColumn, diff.modified):
         if not valid_column_default(c.new):
             _log_invalid_default(c.table.raw_name, c.new.raw_name)
-            return False
-    return True
+            ret = False
+    return ret
 
 
 def sql_diff_checklist(diff: SchemaDiff) -> str:
