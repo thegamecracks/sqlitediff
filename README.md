@@ -7,9 +7,9 @@ A command-line program for generating SQLite schema diffs.
 
 > [!NOTE]
 >
-> This project is not associated with [5f0ne](https://github.com/5f0ne)'s
-> PyPI package, [sqlitediff](https://pypi.org/project/sqlitediff/),
-> which caters towards analysis of data changes in an SQLite database.
+> This project is not associated with the sqlitediff package on [PyPI](https://pypi.org/project/sqlitediff/),
+> catering towards forensic analysis of SQLite databases. If you're interested
+> in 5f0ne's source code, check out [his repository](https://github.com/5f0ne/sqlitediff)!
 
 ```sql
 $ sqlitediff examples/user_group_1.sql examples/user_group_2.sql
