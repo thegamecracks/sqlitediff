@@ -77,15 +77,6 @@ and tries to produce [ALTER TABLE] statements where supported by SQLite.
 Additionally, recommendations will be provided if sqlitediff detects
 potential issues with the output script such as table/column renames.
 
-> [!WARNING]
->
-> Do not run sqlitediff's output on a production database un-modified
-> without first verifying that the script works on a copy. Some modifications
-> by themselves can cause constraint violations or data loss due to ambiguity
-> in how the changes should be applied or the order in which they are executed.
-> In the worst-case scenario, you can use the output as a reference to write
-> your own migration script.
-
 [`sqlite_schema`]: https://sqlite.org/schematab.html
 [ALTER TABLE]: https://sqlite.org/lang_altertable.html
 
@@ -102,6 +93,15 @@ After installation, the command-line interface can be used with `sqlitediff`
 or `python -m sqlitediff`. It can compare SQLite database files directly
 or take .sql scripts which are executed in-memory before comparison.
 Run [`sqlitediff --help`](/src/sqlitediff/__main__.py) for more information.
+
+> [!WARNING]
+>
+> Do not run sqlitediff's output on a production database un-modified
+> without first verifying that the script works on a copy. Some modifications
+> by themselves can cause constraint violations or data loss due to ambiguity
+> in how the changes should be applied or the order in which they are executed.
+> In the worst-case scenario, you can use the output as a reference to write
+> your own migration script.
 
 ## License
 
