@@ -23,6 +23,14 @@ tests = [
     "pytest>=7.4.3",
 ]
 
+[tool.pyright]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    "build",
+]
+
 [tool.setuptools_scm]
 
 [project.urls]
