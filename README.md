@@ -86,7 +86,7 @@ Assuming you have [Python 3.8+](https://www.python.org/downloads/) and
 [Git](https://git-scm.com/), you can install this application with:
 
 ```sh
-pip install git+https://github.com/thegamecracks/sqlitediff@v0.1.6
+pip install git+https://github.com/thegamecracks/sqlitediff@v0.1.7
 ```
 
 After installation, the command-line interface can be used with `sqlitediff`
