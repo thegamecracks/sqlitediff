@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 @functools.lru_cache
 def get_table_grammar() -> str:
+    assert __package__ is not None
     return importlib.resources.read_text(__package__, "table.lark")
 
 
