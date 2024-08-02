@@ -15,6 +15,10 @@ dependencies = [
     "lark>=1.0.0",
 ]
 
+[project.urls]
+"Homepage" = "https://github.com/thegamecracks/sqlitediff"
+"Issue Tracker" = "https://github.com/thegamecracks/sqlitediff/issues"
+
 [project.scripts]
 sqlitediff = "sqlitediff.__main__:main"
 
@@ -32,7 +36,3 @@ exclude = [
 ]
 
 [tool.setuptools_scm]
-
-[project.urls]
-"Homepage" = "https://github.com/thegamecracks/sqlitediff"
-"Issue Tracker" = "https://github.com/thegamecracks/sqlitediff/issues"
